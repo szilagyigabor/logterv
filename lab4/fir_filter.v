@@ -148,7 +148,7 @@ mul_24x35 mul_fir(
 wire accu_rst;
 wire accu_en;
 //TODO
-assign accu_rst = din_valid[0] || din_valid[1];
+assign accu_rst = din_valid[0] | din_valid[1];
 
 always @(posedge clk) begin
 	if (din_valid[0] || din_valid[1]) begin
