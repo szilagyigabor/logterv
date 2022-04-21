@@ -16,46 +16,42 @@ module fir_filter(
 //  1: aktív szûrés
 //TODO state
 reg state;
-reg [8:0] state_cntr;
 always @(posedge clk) begin
-   if (|din_valid) begin
-      state <= 1;
-      state_cntr <= 0;
-   end else begin
-      state_cntr <= state_cntr + 1;
-      if (state_cntr[8]) begin
-         state <= 0;
-      end
-   end
+   if (|din_valid)
+      state <= 1'b1;
+   else
+      if (coeff_addr_reg == 0)
+         state <= 1'b0;
 end
 // együttható címszámláló
 //  255...0 között számol, konvolúció kezdetekor 255-re állítjuk
+//  din_validot kell használni, mert a state-nek van egy késleltetése
 reg [7:0] coeff_addr_reg;
 always @(posedge clk) begin
-   if (state==1 and state_dl==0) begin
-      coeff_addr_reg <= 255;
-   end else begin
+   if (din_valid != 2'b00) begin
+      coeff_addr_reg <= 8'd255;
+   end
+   else begin
       coeff_addr_reg <= coeff_addr_reg - 1;
    end
 end
 
-if
 
 // feldolgozás alatt álló csatorna
 // konvolúció kezdetekor elmentjük, hogy melyik bemenet volt érvényes
 reg ch_act;
 always @(posedge clk) begin
-   if (state==1 and state_dl==0) begin
-      ch_act <= (din_valid==2'b1) ? 0 : 1;
+   if (|din_valid) begin
+      ch_act <= din_valid[1];
    end
 end
 
 
 // aktív szûrés (state) késleltetése
-reg state_dl;// eredeti: reg [7:0] state_dl;
+reg [7:0] state_dl;// eredeti: reg [7:0] state_dl;
 //TODO: ez miért 8 bit?
 always @(posedge clk) begin
-   state_dl <= state;
+   state_dl <= {state_dl[6:0], state};
 end
 
 
@@ -67,8 +63,8 @@ assign coeff_addr = {ch_act, coeff_addr_reg};
 
 // minta írási címszámláló
 //   din_valid[1]-re inkrementál
-//   TODO itt szerintem hiányzik egy reszet
-reg [7:0] smpl_wr_addr_reg;
+//   kezdőérték csak a szimuláció miatt kell
+reg [7:0] smpl_wr_addr_reg = 0;
 always @(posedge clk) begin
    if (din_valid[1]) begin
       smpl_wr_addr_reg <= smpl_wr_addr_reg + 1;
@@ -78,6 +74,7 @@ end
 
 // minta írási cím
 //   {input valid, címszámláló}
+//   íráshoz a din_valid-ot használjuk, olvasáshoz a ch_act-ot
 wire [8:0] smpl_wr_addr;
 assign smpl_wr_addr = {din_valid[1], smpl_wr_addr_reg};
 
@@ -86,7 +83,7 @@ assign smpl_wr_addr = {din_valid[1], smpl_wr_addr_reg};
 // smpl_wr_addr_reg_rõl indul új minta érkezésekor, dekrementálódik
 reg [7:0] smpl_rd_addr_reg;
 always @(posedge clk) begin
-  if (|din_valid) begin
+   if (|din_valid) begin
       smpl_rd_addr_reg <= smpl_wr_addr_reg;
    end else begin
       smpl_rd_addr_reg <= smpl_rd_addr_reg - 1;
@@ -147,20 +144,8 @@ mul_24x35 mul_fir(
 // Engedélyezés: amikor érvényes a bemenete (state[1] késleltetve pipeline latency-vel)
 wire accu_rst;
 wire accu_en;
-//TODO
-assign accu_rst = din_valid[0] | din_valid[1];
-
-always @(posedge clk) begin
-	if (din_valid[0] || din_valid[1]) begin
-		accu_en <= 1;
-	end
-	else
-		if (coeff_addr_reg) begin
-			
-		end
-	end
-end
-
+assign accu_rst = (state_dl[5:4] == 2'b01);
+assign accu_en = state_dl[4];
 
 // Reset: az érvényes bemenetet írjuk be akkumulálás nélkül
 // 256 db s.4.54 összege --> s.12.54 --> 67 bit
@@ -186,22 +171,25 @@ end
 //  Kimenet érvényes: csatorna + accu_en lefutó él
 reg [23:0] dout_reg; //=accu[31+24:31];
 always @(posedge clk) begin
-   if (accu[66]==1 and accu[65:54] != 12'hfff) begin
+   if (accu[66]==1 && accu[65:54] != 12'hfff) begin
       dout_reg <= 24'h800000;
-   end else if (accu[66] == 0 and accu[65:54] != 12'h0) begin
-      dout_reg <= 24'h7fffff;
-   end else begin
-      dout_reg <= accu[53:31]
+   end
+   else begin
+       if (accu[66] == 0 & accu[65:54] != 12'h0) begin
+           dout_reg <= 24'h7fffff;
+       end
+       else begin
+           dout_reg <= accu[53:31];
+       end
    end
 end
 
+// ez még kicsit bizonytalan
+// TODO
 reg  [1:0] dout_valid_reg;
-always @(negedge accu_en) begin
-  if (ch_act) begin
-      dout_valid <= 2'h2;
-   end else begin
-      dout_valid <= 2'h1;
-   end
+always @(posedge clk) begin
+    dout_valid_reg[0] <= (state_dl[5:4] == 2'b10 && ch_act == 1'b0);
+    dout_valid_reg[1] <= (state_dl[5:4] == 2'b10 && ch_act == 1'b1);
 end
 
 
