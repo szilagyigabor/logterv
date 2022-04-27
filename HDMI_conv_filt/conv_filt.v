@@ -1,3 +1,5 @@
+`timescale 1ns / 1ps
+
 module conv_filt (
    input       clk,
    input       rst,
@@ -41,13 +43,13 @@ bram_delay bram_delay_0(
    .clk(clk),
    .rst(rst),
    .data_in({red_v, green_v, blue_v}),
-   .cntr_in({rx_dv, rx_hs, rx_vs}),
+   .stat_in({rx_dv, rx_hs, rx_vs}),
    .pa(bram_pa),
    .pb(bram_pb),
    .pc(bram_pc),
    .pd(bram_pd),
    .pe(bram_pe),
-   .cntr_out({dv, hs, vs})
+   .stat_o({dv, hs, vs})
 );
 
 dsp_cascade dsp0(
