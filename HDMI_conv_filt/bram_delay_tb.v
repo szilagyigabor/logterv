@@ -23,8 +23,8 @@ module bram_delay_tb ();
      .data_in(din),
      .stat_in(st_in),
 
-     .pa(pa)
-     .pb(pb)
+     .pa(pa),
+     .pb(pb),
      .pc(pc),
      .pd(pd),
      .pe(pe),

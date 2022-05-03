@@ -16,14 +16,14 @@ module conv_filt (
    output [7:0] tx_blue,
    output       tx_dv,
    output       tx_hs,
-   output       tx_vs,
+   output       tx_vs
 );
 
 // coming out from BRAM,
 // into shift reg
-reg dv;
-reg hs;
-reg vs;
+wire dv;
+wire hs;
+wire vs;
 
 wire [7:0] red_v;
 wire [7:0] green_v;
@@ -33,11 +33,11 @@ assign red_v   = (rx_red   & {8{rx_dv}});
 assign green_v = (rx_green & {8{rx_dv}});
 assign blue_v  = (rx_blue  & {8{rx_dv}});
 
-reg [23:0] bram_pa;
-reg [23:0] bram_pb;
-reg [23:0] bram_pc;
-reg [23:0] bram_pd;
-reg [23:0] bram_pe;
+wire [23:0] bram_pa;
+wire [23:0] bram_pb;
+wire [23:0] bram_pc;
+wire [23:0] bram_pd;
+wire [23:0] bram_pe;
 
 bram_delay bram_delay_0(
    .clk(clk),

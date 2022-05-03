@@ -13,5 +13,67 @@ module bram_delay (
   output [23:0] pe,
   output [2:0]  stat_o
 );
+wire hs = stat_in[1];
+
+reg [11:0] pic_width;
+reg [11:0] pic_w_cntr;
+reg [11:0] pic_w_cntr_prev;
+always @(posedge clk) begin
+  if (rst) begin
+    pic_w_cntr <= 0;
+    pic_w_cntr_prev <= 0;
+  end else if (hs) begin
+    pic_width <= pic_w_cntr_prev;
+    pic_w_cntr <= 0;
+  end
+  pic_w_cntr_prev <= pic_w_cntr;
+end
+
+
+wire [26:0] del0_out;
+sp_ram bram_delay0(
+  .clk(clk),
+  .en(1),
+  .we(1),
+  .addr(),
+  .din({stat_in, data_in}),
+  .dout(del0_out)
+);
+
+wire [26:0] del1_out;
+sp_ram bram_delay1(
+  .clk(clk),
+  .en(1),
+  .we(1),
+  .addr(),
+  .din(del0_out),
+  .dout(del1_out)
+);
+
+wire [26:0] del2_out;
+sp_ram bram_delay2(
+  .clk(clk),
+  .en(1),
+  .we(1),
+  .addr(),
+  .din(del1_out),
+  .dout(del2_out)
+);
+wire [26:0] del3_out;
+sp_ram bram_delay3(
+  .clk(clk),
+  .en(1),
+  .we(1),
+  .addr(),
+  .din(del2_out),
+  .dout(del3_out)
+);
+
+assign pa = data_in;
+assign pb = del0_out[23:0];
+assign pc = del1_out[23:0];
+assign pd = del2_out[23:0];
+assign pe = del3_out[23:0];
+assign stat_o = del3_out[26:24];
 
 endmodule
