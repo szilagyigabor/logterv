@@ -137,7 +137,7 @@ wire [7:0] bram_pc_blue;
 wire [7:0] bram_pd_blue;
 wire [7:0] bram_pe_blue;
 
-bram_delay bram_delay_1(
+bram_delay bram_delay_2(
    .clk(clk),
    .rst(rst),
    .data_in(blue_v),
@@ -151,7 +151,7 @@ bram_delay bram_delay_1(
    .pe(bram_pe_blue),
    .stat_o(vs)
 );
-dsp_cascade dsp1(
+dsp_cascade dsp2(
    .clk(clk),
    .rst(rst),
    .pa(bram_pa_blue),
