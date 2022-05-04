@@ -6,22 +6,34 @@ module bram_delay_tb ();
   reg clk;
   reg rst;
 
-  reg [23:0] din;
-  reg [2:0]  st_in;
+  reg [7:0] din;
+  reg       st_i;
 
   // outputs
-  reg [23:0] pa;
-  reg [23:0] pb;
-  reg [23:0] pc;
-  reg [23:0] pd;
-  reg [23:0] pe;
-  reg [2:0]  st_o;
+  wire [7:0] pa;
+  wire [7:0] pb;
+  wire [7:0] pc;
+  wire [7:0] pd;
+  wire [7:0] pe;
+  wire       st_o;
+
+  reg [11:0] addr_reg;
+always @(posedge clk) begin
+  if (rst) begin
+    addr_reg <= 0;
+  end else if ( addr_reg == 20 ) begin
+    addr_reg <= 0;
+  end else begin
+    addr_reg <= addr_reg + 1;
+  end
+end
 
   bram_delay bram(
      .clk(clk),
      .rst(rst),
      .data_in(din),
      .stat_in(st_in),
+     .addr(addr_reg),
 
      .pa(pa),
      .pb(pb),
@@ -47,7 +59,7 @@ module bram_delay_tb ();
   // egy számlálót kell beadni neki
   // és összehasonlítani a kimenet eltolódását a bemenethez képest
     din = 0;
-    #2
+    #1
     forever #2 din = din + 1;
   end
 
@@ -56,39 +68,12 @@ module bram_delay_tb ();
   initial begin
   // A status jelek késleltetését jellegzetes impulzusszélességekkel
   // lehet jól ellenőrizni
-    st_i[0]=0;
+    st_i=0;
     for (i=2; i<500; i=i+2) begin
       #i
-      st_i[0]=1;
+      st_i=1;
       #i
-      st_i[0]=0;
-    end
-  end
-
-  integer j;
-  initial begin
-  // A status jelek késleltetését jellegzetes impulzusszélességekkel
-  // lehet jól ellenőrizni
-    st_i[1]=0;
-    for (j=2; j<500; j=j+2) begin
-      #j
-      st_i[1]=1;
-      #j
-      st_i[1]=0;
-    end
-  end
-
-  integer k;
-  initial begin
-  // A status jelek késleltetését jellegzetes impulzusszélességekkel
-  // lehet jól ellenőrizni
-    st_i[2]=0;
-    #2
-    for (k=2; k<500; k=k+2) begin
-      #k
-      st_i[2]=1;
-      #k
-      st_i[2]=0;
+      st_i=0;
     end
   end
 

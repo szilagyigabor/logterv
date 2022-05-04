@@ -18,8 +18,8 @@ module bram_delay (
 wire [8:0] del0_out;
 sp_ram bram_delay0(
   .clk(clk),
-  .en(1),
-  .we(1),
+  .en(1'b1),
+  .we(1'b1),
   .addr(addr),
   .din({stat_in, data_in}),
   .dout(del0_out)
@@ -28,8 +28,8 @@ sp_ram bram_delay0(
 wire [8:0] del1_out;
 sp_ram bram_delay1(
   .clk(clk),
-  .en(1),
-  .we(1),
+  .en(1'b1),
+  .we(1'b1),
   .addr(addr),
   .din(del0_out),
   .dout(del1_out)
@@ -38,8 +38,8 @@ sp_ram bram_delay1(
 wire [8:0] del2_out;
 sp_ram bram_delay2(
   .clk(clk),
-  .en(1),
-  .we(1),
+  .en(1'b1),
+  .we(1'b1),
   .addr(addr),
   .din(del1_out),
   .dout(del2_out)
@@ -47,8 +47,8 @@ sp_ram bram_delay2(
 wire [8:0] del3_out;
 sp_ram bram_delay3(
   .clk(clk),
-  .en(1),
-  .we(1),
+  .en(1'b1),
+  .we(1'b1),
   .addr(addr),
   .din(del2_out),
   .dout(del3_out)
