@@ -16,7 +16,7 @@ module conv_filt (
    output [7:0] tx_blue,
    output       tx_dv,
    output       tx_hs,
-   output       tx_vs,
+   output       tx_vs
 );
 
 // coming out from BRAM,

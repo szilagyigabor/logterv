@@ -1,19 +1,3 @@
-`timescale 1ns / 1ps
-
-module dsp_cascade (
-  input         clk,
-  input         rst,
-  input  [7:0]  pa,
-  input  [7:0]  pb,
-  input  [7:0]  pc,
-  input  [7:0]  pd,
-  input  [7:0]  pe,
-
-  output [7:0]  p_out
-);
-
-endmodule
-
 // DSP48E1: 48-bit Multi-Functional Arithmetic Block
 //          Kintex-7
 // Xilinx HDL Language Template, version 2021.2
@@ -109,4 +93,3 @@ DSP48E1_inst (
 
 // End of DSP48E1_inst instantiation
 			
-				
