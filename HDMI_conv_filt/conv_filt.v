@@ -21,9 +21,9 @@ module conv_filt (
 
 // coming out from BRAM,
 // into shift reg
-reg dv;
-reg hs;
-reg vs;
+wire dv;
+wire hs;
+wire vs;
 
 wire [7:0] red_v;
 wire [7:0] green_v;
@@ -33,58 +33,134 @@ assign red_v   = (rx_red   & {8{rx_dv}});
 assign green_v = (rx_green & {8{rx_dv}});
 assign blue_v  = (rx_blue  & {8{rx_dv}});
 
-reg [23:0] bram_pa;
-reg [23:0] bram_pb;
-reg [23:0] bram_pc;
-reg [23:0] bram_pd;
-reg [23:0] bram_pe;
+
+// counter to set picture line length
+// current line is delayed according to
+// the length of the previous line
+reg [11:0] pic_width;
+reg [11:0] pic_w_cntr;
+reg [11:0] pic_w_cntr_prev;
+always @(posedge clk) begin
+  if (rst) begin
+    pic_w_cntr <= 0;
+    pic_w_cntr_prev <= 0;
+  end else if (rx_hs) begin
+    pic_width <= pic_w_cntr_prev;
+    pic_w_cntr <= 0;
+  end
+  pic_w_cntr_prev <= pic_w_cntr;
+end
+
+// calculate address for single port blockrams
+// to work cyclically
+reg [11:0] addr_reg;
+always @(posedge clk) begin
+  if (rst) begin
+    addr_reg <= 0;
+  end else if ( addr_reg == pic_width ) begin
+    addr_reg <= 0;
+  end else begin
+    addr_reg <= addr_reg + 1;
+  end
+end
+
+///////////////////// red
+wire [7:0] bram_pa_red;
+wire [7:0] bram_pb_red;
+wire [7:0] bram_pc_red;
+wire [7:0] bram_pd_red;
+wire [7:0] bram_pe_red;
 
 bram_delay bram_delay_0(
    .clk(clk),
    .rst(rst),
-   .data_in({red_v, green_v, blue_v}),
-   .stat_in({rx_dv, rx_hs, rx_vs}),
-   .pa(bram_pa),
-   .pb(bram_pb),
-   .pc(bram_pc),
-   .pd(bram_pd),
-   .pe(bram_pe),
-   .stat_o({dv, hs, vs})
-);
+   .data_in(red_v),
+   .stat_in(rx_dv),
+   .addr(addr_reg),
 
+   .pa(bram_pa_red),
+   .pb(bram_pb_red),
+   .pc(bram_pc_red),
+   .pd(bram_pd_red),
+   .pe(bram_pe_red),
+   .stat_o(dv)
+);
 dsp_cascade dsp0(
    .clk(clk),
    .rst(rst),
-   .pa(bram_pa[7:0]),
-   .pb(bram_pb[7:0]),
-   .pc(bram_pc[7:0]),
-   .pd(bram_pd[7:0]),
-   .pe(bram_pe[7:0]),
+   .pa(bram_pa_red),
+   .pb(bram_pb_red),
+   .pc(bram_pc_red),
+   .pd(bram_pd_red),
+   .pe(bram_pe_red),
 
-   .p_out(tx_blue)
+   .p_out(tx_red)
+);
+
+///////////////////// green
+wire [7:0] bram_pa_green;
+wire [7:0] bram_pb_green;
+wire [7:0] bram_pc_green;
+wire [7:0] bram_pd_green;
+wire [7:0] bram_pe_green;
+
+bram_delay bram_delay_1(
+   .clk(clk),
+   .rst(rst),
+   .data_in(green_v),
+   .stat_in(rx_hs),
+   .addr(addr_reg),
+
+   .pa(bram_pa_green),
+   .pb(bram_pb_green),
+   .pc(bram_pc_green),
+   .pd(bram_pd_green),
+   .pe(bram_pe_green),
+   .stat_o(hs)
 );
 dsp_cascade dsp1(
    .clk(clk),
    .rst(rst),
-   .pa(bram_pa[15:8]),
-   .pb(bram_pb[15:8]),
-   .pc(bram_pc[15:8]),
-   .pd(bram_pd[15:8]),
-   .pe(bram_pe[15:8]),
+   .pa(bram_pa_green),
+   .pb(bram_pb_green),
+   .pc(bram_pc_green),
+   .pd(bram_pd_green),
+   .pe(bram_pe_green),
 
    .p_out(tx_green)
 );
 
+///////////////////// blue
+wire [7:0] bram_pa_blue;
+wire [7:0] bram_pb_blue;
+wire [7:0] bram_pc_blue;
+wire [7:0] bram_pd_blue;
+wire [7:0] bram_pe_blue;
+
+bram_delay bram_delay_2(
+   .clk(clk),
+   .rst(rst),
+   .data_in(blue_v),
+   .stat_in(rx_vs),
+   .addr(addr_reg),
+
+   .pa(bram_pa_blue),
+   .pb(bram_pb_blue),
+   .pc(bram_pc_blue),
+   .pd(bram_pd_blue),
+   .pe(bram_pe_blue),
+   .stat_o(vs)
+);
 dsp_cascade dsp2(
    .clk(clk),
    .rst(rst),
-   .pa(bram_pa[23:16]),
-   .pb(bram_pb[23:16]),
-   .pc(bram_pc[23:16]),
-   .pd(bram_pd[23:16]),
-   .pe(bram_pe[23:16]),
+   .pa(bram_pa_blue),
+   .pb(bram_pb_blue),
+   .pc(bram_pc_blue),
+   .pd(bram_pd_blue),
+   .pe(bram_pe_blue),
 
-   .p_out(tx_red)
+   .p_out(tx_blue)
 );
 
 // TODO: exact length to be determined
