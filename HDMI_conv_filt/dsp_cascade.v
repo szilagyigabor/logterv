@@ -8,37 +8,75 @@ module dsp_cascade (
   input  [7:0]  pc,
   input  [7:0]  pd,
   input  [7:0]  pe,
-  input  [17:0]  coeff[24:0],
 
   output [7:0]  p_out
 );
 
+
+// az együtthatók egészrészének bitszáma,
+// min 0, max 17
+parameter erb = 1; // "EgészRész Bitszám"
+
+// konstans együtthatók ilyen formátumban:
+// s.(erb).(17-erb)
+wire [17:0] coeff[24:0];
+assign coeff[0]  = 18'b100000000000000000;
+assign coeff[1]  = 18'b010000000000000000;
+assign coeff[2]  = 18'b001000000000000000;
+assign coeff[3]  = 18'b000100000000000000;
+assign coeff[4]  = 18'b000010000000000000;
+
+assign coeff[5]  = 18'b000001000000000000;
+assign coeff[6]  = 18'b000000100000000000;
+assign coeff[7]  = 18'b000000010000000000;
+assign coeff[8]  = 18'b000000001000000000;
+assign coeff[9]  = 18'b000000000100000000;
+
+assign coeff[10] = 18'b000000000000000000;
+assign coeff[11] = 18'b000000000000000000;
+assign coeff[12] = 18'b000000000000000000; // ez a középső, jelenleg = 1
+assign coeff[13] = 18'b000000000000000000;
+assign coeff[14] = 18'b000000000000000000;
+
+assign coeff[15] = 18'b000000000000000000;
+assign coeff[16] = 18'b000000000000000000;
+assign coeff[17] = 18'b000000000000000000;
+assign coeff[18] = 18'b000000000000000000;
+assign coeff[19] = 18'b000000000000000000;
+
+assign coeff[20] = 18'b000000000000000000;
+assign coeff[21] = 18'b000000000000000000;
+assign coeff[22] = 18'b000000000000000000;
+assign coeff[23] = 18'b000000000000000000;
+assign coeff[24] = 18'b000000000000000000;
+
 // a 25 mély tömb a 25 kaszkád DSP ki- és bemenetei között
 wire [47:0] pcascout[24:0];
 
-// dummy 48 bites kimeneti wire az utolsó DSP kimenetén.
+// Dummy 48 bites kimeneti wire az utolsó DSP kimenetén.
 // Ebből csak a megfelelő 8 bit az értelmes pixelérték,
-// ezek kiválasztandók
+// ezek kiválasztandók az erb paraméter értékével.
 wire [47:0] fullsum;
-assign p_out = fullsum[23:16];
+//assign p_out = fullsum[24-erb:17-erb];
+assign p_out = {8{| fullsum[0]}};
 
 // késleltető shiftregisterek a bemeneti pixelértékeknek
-reg [8:0] pbshr[4:0];
-reg [8:0] pcshr[9:0];
-reg [8:0] pdshr[14:0];
-reg [8:0] peshr[19:0];
+reg [39:0] pbshr;
+reg [79:0] pcshr;
+reg [119:0] pdshr;
+reg [159:0] peshr;
 always @(posedge clk) begin
     if (rst) begin
-        pbshr <= 0;
-        pcshr <= 0;
-        pdshr <= 0;
-        peshr <= 0;
+        pbshr <= 0; 
+        pcshr <= 0; 
+        pdshr <= 0; 
+        peshr <= 0; 
     end
     else begin
-        pbshr <= {pb, pbshr[4:1]}; 
-        pcshr <= {pc, pcshr[9:1]}; 
-        pdshr <= {pd, pdshr[14:1]}; 
-        peshr <= {pe, peshr[19:1]}; 
+        pbshr <= {pb, pbshr[5*8-1:8]}; 
+        pcshr <= {pc, pcshr[10*8-1:8]}; 
+        pdshr <= {pd, pdshr[15*8-1:8]}; 
+        peshr <= {pe, peshr[20*8-1:8]};
     end
 end
 
@@ -46,7 +84,7 @@ end
 // -értékek bemenetekhez rendelése, 5-ös csoportokban
 wire [7:0] pixelvalues[24:0];
 genvar k;
-generate;
+generate
     for (k=0;k<5;k=k+1)
     begin: gen_pval
         assign pixelvalues[k] = pa;
@@ -73,11 +111,11 @@ DSP48E1 #(
   .SEL_PATTERN("PATTERN"),          // Select pattern value ("PATTERN" or "C")
   .USE_PATTERN_DETECT("NO_PATDET"), // Enable pattern detect ("PATDET" or "NO_PATDET")
   // Register Control Attributes: Pipeline Register Configuration
-  .ACASCREG(0),                     // Number of pipeline stages between A/ACIN and ACOUT (0, 1 or 2)
+  .ACASCREG(1),                     // Number of pipeline stages between A/ACIN and ACOUT (0, 1 or 2)
   .ADREG(0),                        // Number of pipeline stages for pre-adder (0 or 1)
   .ALUMODEREG(0),                   // Number of pipeline stages for ALUMODE (0 or 1)
   .AREG(1),                         // Number of pipeline stages for A (0, 1 or 2)
-  .BCASCREG(0),                     // Number of pipeline stages between B/BCIN and BCOUT (0, 1 or 2)
+  .BCASCREG(1),                     // Number of pipeline stages between B/BCIN and BCOUT (0, 1 or 2)
   .BREG(1),                         // Number of pipeline stages for B (0, 1 or 2)
   .CARRYINREG(0),                   // Number of pipeline stages for CARRYIN (0 or 1)
   .CARRYINSELREG(0),                // Number of pipeline stages for CARRYINSEL (0 or 1)
@@ -88,7 +126,7 @@ DSP48E1 #(
   .OPMODEREG(0),                    // Number of pipeline stages for OPMODE (0 or 1)
   .PREG(1)                          // Number of pipeline stages for P (0 or 1)
 )
-DSP48E1_inst (
+DSP48E1_inst_first (
   // Cascade: 30-bit (each) output: Cascade Ports
   .ACOUT(),                   // 30-bit output: A port cascade output
   .BCOUT(),                   // 18-bit output: B port cascade output
@@ -106,7 +144,7 @@ DSP48E1_inst (
   // Cascade: 30-bit (each) input: Cascade Ports
   .ACIN(30'b1),                     // 30-bit input: A cascade data input
   .BCIN(18'b1),                     // 18-bit input: B cascade input
-  .CARRYCASCIN(1'b1),       // 1-bit input: Cascade carry input
+  .CARRYCASCIN(1'b0),       // 1-bit input: Cascade carry input
   .MULTSIGNIN(1'b1),         // 1-bit input: Multiplier sign input
   .PCIN(48'b1),                     // 48-bit input: P cascade input
   // Control: 4-bit (each) input: Control Inputs/Status Bits
@@ -152,7 +190,7 @@ DSP48E1_inst (
 // A 2.-tól a 24.-ig példányosítás:
 genvar i;
 generate
-    for (i=1; i<25; i=i+1)
+    for (i=1; i<24; i=i+1)
     begin: gen_dsp
 
 DSP48E1 #(
@@ -170,11 +208,11 @@ DSP48E1 #(
   .SEL_PATTERN("PATTERN"),          // Select pattern value ("PATTERN" or "C")
   .USE_PATTERN_DETECT("NO_PATDET"), // Enable pattern detect ("PATDET" or "NO_PATDET")
   // Register Control Attributes: Pipeline Register Configuration
-  .ACASCREG(0),                     // Number of pipeline stages between A/ACIN and ACOUT (0, 1 or 2)
+  .ACASCREG(1),                     // Number of pipeline stages between A/ACIN and ACOUT (0, 1 or 2)
   .ADREG(0),                        // Number of pipeline stages for pre-adder (0 or 1)
   .ALUMODEREG(0),                   // Number of pipeline stages for ALUMODE (0 or 1)
   .AREG(1),                         // Number of pipeline stages for A (0, 1 or 2)
-  .BCASCREG(0),                     // Number of pipeline stages between B/BCIN and BCOUT (0, 1 or 2)
+  .BCASCREG(1),                     // Number of pipeline stages between B/BCIN and BCOUT (0, 1 or 2)
   .BREG(1),                         // Number of pipeline stages for B (0, 1 or 2)
   .CARRYINREG(0),                   // Number of pipeline stages for CARRYIN (0 or 1)
   .CARRYINSELREG(0),                // Number of pipeline stages for CARRYINSEL (0 or 1)
@@ -203,7 +241,7 @@ DSP48E1_inst (
   // Cascade: 30-bit (each) input: Cascade Ports
   .ACIN(30'b1),                     // 30-bit input: A cascade data input
   .BCIN(18'b1),                     // 18-bit input: B cascade input
-  .CARRYCASCIN(1'b1),       // 1-bit input: Cascade carry input
+  .CARRYCASCIN(1'b0),       // 1-bit input: Cascade carry input
   .MULTSIGNIN(1'b1),         // 1-bit input: Multiplier sign input
   .PCIN(pcascout[i-1]),                     // 48-bit input: P cascade input
   // Control: 4-bit (each) input: Control Inputs/Status Bits
@@ -247,6 +285,7 @@ DSP48E1_inst (
     end
 endgenerate
 
+
 //// a legutolsó DSP külön ////
 DSP48E1 #(
   // Feature Control Attributes: Data Path Selection
@@ -263,11 +302,11 @@ DSP48E1 #(
   .SEL_PATTERN("PATTERN"),          // Select pattern value ("PATTERN" or "C")
   .USE_PATTERN_DETECT("NO_PATDET"), // Enable pattern detect ("PATDET" or "NO_PATDET")
   // Register Control Attributes: Pipeline Register Configuration
-  .ACASCREG(0),                     // Number of pipeline stages between A/ACIN and ACOUT (0, 1 or 2)
+  .ACASCREG(1),                     // Number of pipeline stages between A/ACIN and ACOUT (0, 1 or 2)
   .ADREG(0),                        // Number of pipeline stages for pre-adder (0 or 1)
   .ALUMODEREG(0),                   // Number of pipeline stages for ALUMODE (0 or 1)
   .AREG(1),                         // Number of pipeline stages for A (0, 1 or 2)
-  .BCASCREG(0),                     // Number of pipeline stages between B/BCIN and BCOUT (0, 1 or 2)
+  .BCASCREG(1),                     // Number of pipeline stages between B/BCIN and BCOUT (0, 1 or 2)
   .BREG(1),                         // Number of pipeline stages for B (0, 1 or 2)
   .CARRYINREG(0),                   // Number of pipeline stages for CARRYIN (0 or 1)
   .CARRYINSELREG(0),                // Number of pipeline stages for CARRYINSEL (0 or 1)
@@ -278,7 +317,7 @@ DSP48E1 #(
   .OPMODEREG(0),                    // Number of pipeline stages for OPMODE (0 or 1)
   .PREG(1)                          // Number of pipeline stages for P (0 or 1)
 )
-DSP48E1_inst (
+DSP48E1_inst_last (
   // Cascade: 30-bit (each) output: Cascade Ports
   .ACOUT(),                   // 30-bit output: A port cascade output
   .BCOUT(),                   // 18-bit output: B port cascade output
@@ -296,7 +335,7 @@ DSP48E1_inst (
   // Cascade: 30-bit (each) input: Cascade Ports
   .ACIN(30'b1),                     // 30-bit input: A cascade data input
   .BCIN(18'b1),                     // 18-bit input: B cascade input
-  .CARRYCASCIN(1'b1),       // 1-bit input: Cascade carry input
+  .CARRYCASCIN(1'b0),       // 1-bit input: Cascade carry input
   .MULTSIGNIN(1'b1),         // 1-bit input: Multiplier sign input
   .PCIN(48'b1),                     // 48-bit input: P cascade input
   // Control: 4-bit (each) input: Control Inputs/Status Bits
