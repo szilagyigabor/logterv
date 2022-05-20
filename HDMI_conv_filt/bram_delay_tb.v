@@ -21,7 +21,7 @@ module bram_delay_tb ();
 always @(posedge clk) begin
   if (rst) begin
     addr_reg <= 0;
-  end else if ( addr_reg == 20 ) begin
+  end else if ( addr_reg == 19 ) begin
     addr_reg <= 0;
   end else begin
     addr_reg <= addr_reg + 1;
@@ -32,7 +32,7 @@ end
      .clk(clk),
      .rst(rst),
      .data_in(din),
-     .stat_in(st_in),
+     .stat_in(st_i),
      .addr(addr_reg),
 
      .pa(pa),
@@ -50,7 +50,7 @@ end
 
   initial begin
     rst = 1;
-    #10
+    #2
     rst = 0;
   end
 

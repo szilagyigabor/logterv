@@ -54,11 +54,33 @@ sp_ram bram_delay3(
   .dout(del3_out)
 );
 
-assign pa = data_in;
-assign pb = del0_out[7:0];
-assign pc = del1_out[7:0];
-assign pd = del2_out[7:0];
+// ossze lehet vonni a kovetkezo modul
+// keslelteteseivel
+
+// eltolodas javitasa
+reg [4*9-1:0] pashr;
+reg [3*9-1:0] pbshr;
+reg [2*9-1:0] pcshr;
+reg [1*9-1:0] pdshr;
+always @(posedge clk) begin
+    if (rst) begin
+        pashr <= 0;
+        pbshr <= 0;
+        pcshr <= 0;
+        pdshr <= 0;
+    end
+    else begin
+        pashr <= { pashr[3*9-1:0], {stat_in, data_in}};
+        pbshr <= { pbshr[2*9-1:0], del0_out};
+        pcshr <= { pcshr[1*9-1:0], del1_out};
+        pdshr <= {                 del2_out};
+    end
+end
+
+assign pa = pashr[4*9-2:3*9];
+assign pb = pbshr[3*9-2:2*9];
+assign pc = pcshr[2*9-2:1*9];
+assign pd = pdshr[7:0];
 assign pe = del3_out[7:0];
 assign stat_o = del3_out[8];
-
 endmodule
