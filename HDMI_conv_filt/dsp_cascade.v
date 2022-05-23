@@ -15,40 +15,74 @@ module dsp_cascade (
 
 // az együtthatók egészrészének bitszáma,
 // min 0, max 17
-parameter erb = 1; // "EgészRész Bitszám"
+parameter erb = 0; // "EgészRész Bitszám"
 
 // konstans együtthatók ilyen formátumban:
 // s.(erb).(17-erb)
 wire [17:0] coeff[24:0];
-assign coeff[0]  = 18'b100000000000000000;
-assign coeff[1]  = 18'b010000000000000000;
-assign coeff[2]  = 18'b001000000000000000;
-assign coeff[3]  = 18'b000100000000000000;
-assign coeff[4]  = 18'b000010000000000000;
+//assign coeff[0]  = 18'b000000000000000000;
+//assign coeff[1]  = 18'b000000000000000000;
+//assign coeff[2]  = 18'b000000000000000000;
+//assign coeff[3]  = 18'b000000000000000000;
+//assign coeff[4]  = 18'b000000000000000000;
 
-assign coeff[5]  = 18'b000001000000000000;
-assign coeff[6]  = 18'b000000100000000000;
-assign coeff[7]  = 18'b000000010000000000;
-assign coeff[8]  = 18'b000000001000000000;
-assign coeff[9]  = 18'b000000000100000000;
+//assign coeff[5]  = 18'b000000000000000000;
+//assign coeff[6]  = 18'b000000000000000000;
+//assign coeff[7]  = 18'b000000000000000000;
+//assign coeff[8]  = 18'b000000000000000000;
+//assign coeff[9]  = 18'b000000000000000000;
 
-assign coeff[10] = 18'b000000000000000000;
-assign coeff[11] = 18'b000000000000000000;
-assign coeff[12] = 18'b000000000000000000; // ez a középső, jelenleg = 1
-assign coeff[13] = 18'b000000000000000000;
-assign coeff[14] = 18'b000000000000000000;
+//assign coeff[10] = 18'b000000000000000000;
+//assign coeff[11] = 18'b000000000000000000;
+//assign coeff[12] = 18'b010000000000000000; // ez a középső, jelenleg = 1
+//assign coeff[13] = 18'b000000000000000000;
+//assign coeff[14] = 18'b000000000000000000;
 
-assign coeff[15] = 18'b000000000000000000;
-assign coeff[16] = 18'b000000000000000000;
-assign coeff[17] = 18'b000000000000000000;
-assign coeff[18] = 18'b000000000000000000;
-assign coeff[19] = 18'b000000000000000000;
+//assign coeff[15] = 18'b000000000000000000;
+//assign coeff[16] = 18'b000000000000000000;
+//assign coeff[17] = 18'b000000000000000000;
+//assign coeff[18] = 18'b000000000000000000;
+//assign coeff[19] = 18'b000000000000000000;
 
-assign coeff[20] = 18'b000000000000000000;
-assign coeff[21] = 18'b000000000000000000;
-assign coeff[22] = 18'b000000000000000000;
-assign coeff[23] = 18'b000000000000000000;
-assign coeff[24] = 18'b000000000000000000;
+//assign coeff[20] = 18'b000000000000000000;
+//assign coeff[21] = 18'b000000000000000000;
+//assign coeff[22] = 18'b000000000000000000;
+//assign coeff[23] = 18'b000000000000000000;
+//assign coeff[24] = 18'b000000000000000000;
+
+//////////////// gauss kernel innentől ////////////////////
+// erb=0-ra van kitalálva
+assign coeff[0]  = 18'b000000000111100000;
+assign coeff[1]  = 18'b000000011110000000;
+assign coeff[2]  = 18'b000000110100100000;
+assign coeff[3]  = 18'b000000011110000000;
+assign coeff[4]  = 18'b000000000111100000;
+
+assign coeff[5]  = 18'b000000011110000000;
+assign coeff[6]  = 18'b000001111000000001;
+assign coeff[7]  = 18'b000011000011000011;
+assign coeff[8]  = 18'b000001111000000001;
+assign coeff[9]  = 18'b000000011110000000;
+
+assign coeff[10] = 18'b000000110100100000;
+assign coeff[11] = 18'b000001111000000001;
+assign coeff[12] = 18'b000100110011100100; // ez a középső
+assign coeff[13] = 18'b000001111000000001;
+assign coeff[14] = 18'b000000110100100000;
+
+assign coeff[15] = 18'b000000011110000000;
+assign coeff[16] = 18'b000001111000000001;
+assign coeff[17] = 18'b000011000011000011;
+assign coeff[18] = 18'b000001111000000001;
+assign coeff[19] = 18'b000000011110000000;
+
+assign coeff[20] = 18'b000000000111100000;
+assign coeff[21] = 18'b000000011110000000;
+assign coeff[22] = 18'b000000110100100000;
+assign coeff[23] = 18'b000000011110000000;
+assign coeff[24] = 18'b000000000111100000;
+
+////////////// gauss kernel idáig //////////////////
 
 // a 25 mély tömb a 25 kaszkád DSP ki- és bemenetei között
 wire [47:0] pcascout[24:0];
@@ -57,8 +91,8 @@ wire [47:0] pcascout[24:0];
 // Ebből csak a megfelelő 8 bit az értelmes pixelérték,
 // ezek kiválasztandók az erb paraméter értékével.
 wire [47:0] fullsum;
-//assign p_out = fullsum[24-erb:17-erb];
-assign p_out = {8{| fullsum[0]}};
+assign p_out = fullsum[24-erb:17-erb];
+//assign p_out = {8{| fullsum[0]}};
 
 // késleltető shiftregisterek a bemeneti pixelértékeknek
 reg [39:0] pbshr;
@@ -88,10 +122,10 @@ generate
     for (k=0;k<5;k=k+1)
     begin: gen_pval
         assign pixelvalues[k] = pa;
-        assign pixelvalues[k+5] = pb;
-        assign pixelvalues[k+10] = pc;
-        assign pixelvalues[k+15] = pd;
-        assign pixelvalues[k+20] = pe;
+        assign pixelvalues[k+5] = pbshr[7:0];
+        assign pixelvalues[k+10] = pcshr[7:0];
+        assign pixelvalues[k+15] = pdshr[7:0];
+        assign pixelvalues[k+20] = peshr[7:0];
     end
 endgenerate
 
@@ -337,7 +371,7 @@ DSP48E1_inst_last (
   .BCIN(18'b1),                     // 18-bit input: B cascade input
   .CARRYCASCIN(1'b0),       // 1-bit input: Cascade carry input
   .MULTSIGNIN(1'b1),         // 1-bit input: Multiplier sign input
-  .PCIN(48'b1),                     // 48-bit input: P cascade input
+  .PCIN(pcascout[23]),                     // 48-bit input: P cascade input
   // Control: 4-bit (each) input: Control Inputs/Status Bits
   .ALUMODE(4'b0000),               // 4-bit input: ALU control input
   .CARRYINSEL(3'b000),         // 3-bit input: Carry select input

@@ -37,28 +37,28 @@ module dsp_cascade_tb ();
   end
 
   initial begin
-    in0={3'b000,5'b00000};
-    forever #2 in0[4:0]=in0[4:0]+1;
+    in0={3'b000,5'b00001};
+    //forever #2 in0[4:0]=in0[4:0]+1;
   end
 
   initial begin
-    in1={3'b001,5'b00000};;
-    forever #2 in1[4:0]=in1[4:0]+1;
+    in1={3'b001,5'b00010};;
+    //forever #2 in1[4:0]=in1[4:0]+1;
   end
 
   initial begin
-    in2={3'b010,5'b00000};;
-    forever #2 in2[4:0]=in2[4:0]+1;
+    in2={3'b000,5'b00100};;
+    //forever #2 in2[4:0]=in2[4:0]+1;
   end
 
   initial begin
-    in3={3'b011,5'b00000};;
-    forever #2 in3[4:0]=in3[4:0]+1;
+    in3={3'b000,5'b01000};;
+    //forever #2 in3[4:0]=in3[4:0]+1;
   end
 
   initial begin
-    in4={3'b100,5'b00000};;
-    forever #2 in4[4:0]=in4[4:0]+1;
+    in4={3'b000,5'b10000};;
+    //forever #2 in4[4:0]=in4[4:0]+1;
   end
 
 
