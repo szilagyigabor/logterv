@@ -1,0 +1,18 @@
+A tapasztalatok eddig különböző kernelekkel:
+
+az indexelés így megy:
+24	23	22	21	20
+19	18	17	16	15
+14	13	12	11	10
+9	8	7	6	5
+4	3	2	1	0
+
+- 6 és 18 = 1/2: ugyanolyan, mint ha csak 12 = 1 lenne
+- 2D gauss blur bluröl, de látszólag csak vízszintesen és kicsit sötét a kép
+- 8 és 16 = 1/2: csak vízszintesen tol el jobbra-balra, de biztosan többel, mint +-1 pixel, lehet, hogy +-2-nél is többel
+- 24=1: jobbra shiftel és lefelé nem, úgy néz ki, csak 1-gyel
+- 23=1: nem mozdul a kép semerre
+- 22=1: jobbra shiftel 1-gyel
+- 2=1: balra shiftel egyel
+- 10=1: jobbra shiftel 1-gyel
+- 14=1: balra shiftel 1-gyel

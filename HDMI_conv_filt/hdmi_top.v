@@ -1,22 +1,22 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer:
-//
+// Company: 
+// Engineer: 
+// 
 // Create Date: 04/03/2019 04:56:58 PM
-// Design Name:
+// Design Name: 
 // Module Name: hdmi_top
-// Project Name:
-// Target Devices:
-// Tool Versions:
-// Description:
-//
-// Dependencies:
-//
+// Project Name: 
+// Target Devices: 
+// Tool Versions: 
+// Description: 
+// 
+// Dependencies: 
+// 
 // Revision:
 // Revision 0.01 - File Created
 // Additional Comments:
-//
+// 
 //////////////////////////////////////////////////////////////////////////////////
 
 
@@ -26,7 +26,7 @@ module hdmi_top(
    output wire [7:0] led_r,
    input  wire [7:0] sw,
    inout  wire [3:0] bt,
-
+   
    input  wire       hdmi_rx_d0_p,
    input  wire       hdmi_rx_d0_n,
    input  wire       hdmi_rx_d1_p,
@@ -39,7 +39,7 @@ module hdmi_top(
    output wire       hdmi_rx_hpd,
    input  wire       hdmi_rx_scl,
    inout  wire       hdmi_rx_sda,
-
+   
    output wire       hdmi_tx_d0_p,
    output wire       hdmi_tx_d0_n,
    output wire       hdmi_tx_d1_p,
@@ -144,33 +144,38 @@ hdmi_rx hdmi_rx_0(
 );
 
 
+// Loopback
+// Replace with image processing block
 wire [7:0] tx_red, tx_green, tx_blue;
 wire tx_dv, tx_hs, tx_vs;
-//conv_filt conv_filt_0(
-//   .clk(rx_clk),
-//   .rst(rst),
+conv_filt conv_filt_0(
+   .clk(rx_clk),
+   .rst(rst),
+   .sw_0(sw[0]),
+   .sw_1(sw[1]),
 
-//   .rx_red(rx_red),
-//   .rx_green(rx_green),
-//   .rx_blue(rx_blue),
-//   .rx_dv(rx_dv),
-//   .rx_hs(rx_hs),
-//   .rx_vs(rx_vs),
+   .rx_red(rx_red),
+   .rx_green(rx_green),
+   .rx_blue(rx_blue),
+   .rx_dv(rx_dv),
+   .rx_hs(rx_hs),
+   .rx_vs(rx_vs),
 
-//   .tx_red(tx_red),
-//   .tx_green(tx_green),
-//   .tx_blue(tx_blue),
-//   .tx_dv(tx_dv),
-//   .tx_hs(tx_hs),
-//   .tx_vs(tx_vs)
-//);
+   .tx_red(tx_red),
+   .tx_green(tx_green),
+   .tx_blue(tx_blue),
+   .tx_dv(tx_dv),
+   .tx_hs(tx_hs),
+   .tx_vs(tx_vs)
+);
 
-assign tx_dv = rx_dv;
-assign tx_hs = rx_hs;
-assign tx_vs = rx_vs;
-assign tx_red = rx_red;
-assign tx_green = rx_green;
-assign tx_blue = rx_blue;
+//assign tx_dv = rx_dv;
+//assign tx_hs = rx_hs;
+//assign tx_vs = rx_vs;
+//assign tx_red = rx_red;
+//assign tx_green = rx_green;
+//assign tx_blue = rx_blue;
+ 
 
 hdmi_tx hdmi_tx_0(
    .tx_clk(rx_clk),
