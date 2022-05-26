@@ -3,8 +3,7 @@
 module dsp_cascade (
   input         clk,
   input         rst,
-  input         sw_0,
-  input         sw_1,
+  input  [7:0]  sw,
   input  [7:0]  pa, // a bemenetek a még nem késleltetett jelek
   input  [7:0]  pb,
   input  [7:0]  pc,
@@ -17,176 +16,44 @@ module dsp_cascade (
 
 // az együtthatók egészrészének bitszáma,
 // min 0, max 17
-parameter erb = 0; // "EgészRész Bitszám"
+parameter erb = 1; // "EgészRész Bitszám"
 
 // konstans együtthatók ilyen formátumban:
 // s.(erb).(17-erb)
 reg [17:0] coeff[24:0];
-wire [1:0] switcher;
 
-assign switcher = {sw_1, sw_0};
 
 always @(posedge clk) begin
-case (switcher)
-    2'b0 : begin
-         coeff[0]  <= 18'b000000000000000000;
-         coeff[1]  <= 18'b000000000000000000;
-         coeff[2]  <= 18'b000000000000000000;
-         coeff[3]  <= 18'b000000000000000000;
-         coeff[4]  <= 18'b000000000000000000;
-        
-         coeff[5]  <= 18'b000000000000000000;
-         coeff[6]  <= 18'b000000000000000000;
-         coeff[7]  <= 18'b000000000000000000;
-         coeff[8]  <= 18'b000000000000000000;
-         coeff[9]  <= 18'b000000000000000000;
-        
-         coeff[10] <= 18'b000000000000000000;
-         coeff[11] <= 18'b000000000000000000;
-         coeff[12] <= 18'b011111111111111111; // ez a középső, jelenleg = 1
-         coeff[13] <= 18'b000000000000000000;
-         coeff[14] <= 18'b000000000000000000;
-        
-         coeff[15] <= 18'b000000000000000000;
-         coeff[16] <= 18'b000000000000000000;
-         coeff[17] <= 18'b000000000000000000;
-         coeff[18] <= 18'b000000000000000000;
-         coeff[19] <= 18'b000000000000000000;
-        
-         coeff[20] <= 18'b000000000000000000;
-         coeff[21] <= 18'b000000000000000000;
-         coeff[22] <= 18'b000000000000000000;
-         coeff[23] <= 18'b000000000000000000;
-         coeff[24] <= 18'b000000000000000000;
+case (sw)
+    8'b00000000 : begin
+      `include "coeffs/dsp_coeff_pos12.v"
     end
-    2'b01 : begin
-         coeff[0]  <= 18'b000000000000000000;
-         coeff[1]  <= 18'b000000000000000000;
-         coeff[2]  <= 18'b000000000000000000;
-         coeff[3]  <= 18'b000000000000000000;
-         coeff[4]  <= 18'b000000000000000000;
-        
-         coeff[5]  <= 18'b000000000000000000;
-         coeff[6]  <= 18'b000000000000000000;
-         coeff[7]  <= 18'b000000000000000000;
-         coeff[8]  <= 18'b000000000000000000;
-         coeff[9]  <= 18'b000000000000000000;
-        
-         coeff[10] <= 18'b011111111111111111;
-         coeff[11] <= 18'b000000000000000000;
-         coeff[12] <= 18'b000000000000000000; // ez a középső
-         coeff[13] <= 18'b000000000000000000;
-         coeff[14] <= 18'b000000000000000000;
-        
-         coeff[15] <= 18'b000000000000000000;
-         coeff[16] <= 18'b000000000000000000;
-         coeff[17] <= 18'b000000000000000000;
-         coeff[18] <= 18'b000000000000000000;
-         coeff[19] <= 18'b000000000000000000;
-        
-         coeff[20] <= 18'b000000000000000000;
-         coeff[21] <= 18'b000000000000000000;
-         coeff[22] <= 18'b000000000000000000;
-         coeff[23] <= 18'b000000000000000000;
-         coeff[24] <= 18'b000000000000000000;
+    8'b00000001 : begin
+      `include "coeffs/dsp_coeff_gauss.v"
     end
-    2'b10 : begin
-         coeff[0]  <= 18'b000000000000000000;
-         coeff[1]  <= 18'b000000000000000000;
-         coeff[2]  <= 18'b000000000000000000;
-         coeff[3]  <= 18'b000000000000000000;
-         coeff[4]  <= 18'b000000000000000000;
-        
-         coeff[5]  <= 18'b000000000000000000;
-         coeff[6]  <= 18'b000000000000000000;
-         coeff[7]  <= 18'b000000000000000000;
-         coeff[8]  <= 18'b000000000000000000;
-         coeff[9]  <= 18'b000000000000000000;
-        
-         coeff[10] <= 18'b000000000000000000;
-         coeff[11] <= 18'b000000000000000000;
-         coeff[12] <= 18'b000000000000000000; // ez a középső
-         coeff[13] <= 18'b000000000000000000;
-         coeff[14] <= 18'b011111111111111111;
-        
-         coeff[15] <= 18'b000000000000000000;
-         coeff[16] <= 18'b000000000000000000;
-         coeff[17] <= 18'b000000000000000000;
-         coeff[18] <= 18'b000000000000000000;
-         coeff[19] <= 18'b000000000000000000;
-        
-         coeff[20] <= 18'b000000000000000000;
-         coeff[21] <= 18'b000000000000000000;
-         coeff[22] <= 18'b000000000000000000;
-         coeff[23] <= 18'b000000000000000000;
-         coeff[24] <= 18'b000000000000000000;
+    8'b00000010 : begin
+      `include "coeffs/dsp_coeff_pos0.v"
     end
-    2'b11 : begin
-         coeff[0]  <= 18'b000000000111100000;
-         coeff[1]  <= 18'b000000011110000000;
-         coeff[2]  <= 18'b000000110100100000;
-         coeff[3]  <= 18'b000000011110000000;
-         coeff[4]  <= 18'b000000000111100000;
-        
-         coeff[5]  <= 18'b000000011110000000;
-         coeff[6]  <= 18'b000001111000000001;
-         coeff[7]  <= 18'b000011000011000011;
-         coeff[8]  <= 18'b000001111000000001;
-         coeff[9]  <= 18'b000000011110000000;
-        
-         coeff[10] <= 18'b000000110100100000;
-         coeff[11] <= 18'b000001111000000001;
-         coeff[12] <= 18'b000100110011100100; // ez a középső
-         coeff[13] <= 18'b000001111000000001;
-         coeff[14] <= 18'b000000110100100000;
-        
-         coeff[15] <= 18'b000000011110000000;
-         coeff[16] <= 18'b000001111000000001;
-         coeff[17] <= 18'b000011000011000011;
-         coeff[18] <= 18'b000001111000000001;
-         coeff[19] <= 18'b000000011110000000;
-        
-         coeff[20] <= 18'b000000000111100000;
-         coeff[21] <= 18'b000000011110000000;
-         coeff[22] <= 18'b000000110100100000;
-         coeff[23] <= 18'b000000011110000000;
-         coeff[24] <= 18'b000000000111100000;
+    8'b00000100 : begin
+      `include "coeffs/dsp_coeff_pos4.v"
     end
-endcase    
+    8'b00001000 : begin
+      `include "coeffs/dsp_coeff_pos20.v"
+    end
+    8'b00010000 : begin
+      `include "coeffs/dsp_coeff_pos24.v"
+    end
+    8'b00100000 : begin
+      `include "coeffs/dsp_coeff_leftright.v"
+    end
+    8'b01000000 : begin
+      `include "coeffs/dsp_coeff_topbot.v"
+    end
+    8'b10000000 : begin
+      `include "coeffs/dsp_coeff_pos22.v"
+    end
+endcase
 end
-//////////////// gauss kernel innentől ////////////////////
-// erb=0-ra van kitalálva
-//assign coeff[0]  = 18'b000000000111100000;
-//assign coeff[1]  = 18'b000000011110000000;
-//assign coeff[2]  = 18'b000000110100100000;
-//assign coeff[3]  = 18'b000000011110000000;
-//assign coeff[4]  = 18'b000000000111100000;
-
-//assign coeff[5]  = 18'b000000011110000000;
-//assign coeff[6]  = 18'b000001111000000001;
-//assign coeff[7]  = 18'b000011000011000011;
-//assign coeff[8]  = 18'b000001111000000001;
-//assign coeff[9]  = 18'b000000011110000000;
-
-//assign coeff[10] = 18'b000000110100100000;
-//assign coeff[11] = 18'b000001111000000001;
-//assign coeff[12] = 18'b000100110011100100; // ez a középső
-//assign coeff[13] = 18'b000001111000000001;
-//assign coeff[14] = 18'b000000110100100000;
-
-//assign coeff[15] = 18'b000000011110000000;
-//assign coeff[16] = 18'b000001111000000001;
-//assign coeff[17] = 18'b000011000011000011;
-//assign coeff[18] = 18'b000001111000000001;
-//assign coeff[19] = 18'b000000011110000000;
-
-//assign coeff[20] = 18'b000000000111100000;
-//assign coeff[21] = 18'b000000011110000000;
-//assign coeff[22] = 18'b000000110100100000;
-//assign coeff[23] = 18'b000000011110000000;
-//assign coeff[24] = 18'b000000000111100000;
-
-////////////// gauss kernel idáig //////////////////
 
 // a 25 mély tömb a 25 kaszkád DSP ki- és bemenetei között
 wire [47:0] pcascout[24:0];
@@ -205,15 +72,15 @@ reg [119:0] pdshr;
 reg [159:0] peshr;
 always @(posedge clk) begin
     if (rst) begin
-        pbshr <= 0; 
-        pcshr <= 0; 
-        pdshr <= 0; 
-        peshr <= 0; 
+        pbshr <= 0;
+        pcshr <= 0;
+        pdshr <= 0;
+        peshr <= 0;
     end
     else begin
-        pbshr <= {pb, pbshr[5*8-1:8]}; 
-        pcshr <= {pc, pcshr[10*8-1:8]}; 
-        pdshr <= {pd, pdshr[15*8-1:8]}; 
+        pbshr <= {pb, pbshr[5*8-1:8]};
+        pcshr <= {pc, pcshr[10*8-1:8]};
+        pdshr <= {pd, pdshr[15*8-1:8]};
         peshr <= {pe, peshr[20*8-1:8]};
     end
 end
@@ -242,10 +109,10 @@ DSP48E1 #(
   .USE_MULT("MULTIPLY"),            // Select multiplier usage ("MULTIPLY", "DYNAMIC", or "NONE")
   .USE_SIMD("ONE48"),               // SIMD selection ("ONE48", "TWO24", "FOUR12")
   // Pattern Detector Attributes: Pattern Detection Configuration
-  .AUTORESET_PATDET("NO_RESET"),    // "NO_RESET", "RESET_MATCH", "RESET_NOT_MATCH" 
+  .AUTORESET_PATDET("NO_RESET"),    // "NO_RESET", "RESET_MATCH", "RESET_NOT_MATCH"
   .MASK(48'h3fffffffffff),          // 48-bit mask value for pattern detect (1=ignore)
   .PATTERN(48'h000000000000),       // 48-bit pattern match for pattern detect
-  .SEL_MASK("MASK"),                // "C", "MASK", "ROUNDING_MODE1", "ROUNDING_MODE2" 
+  .SEL_MASK("MASK"),                // "C", "MASK", "ROUNDING_MODE1", "ROUNDING_MODE2"
   .SEL_PATTERN("PATTERN"),          // Select pattern value ("PATTERN" or "C")
   .USE_PATTERN_DETECT("NO_PATDET"), // Enable pattern detect ("PATDET" or "NO_PATDET")
   // Register Control Attributes: Pipeline Register Configuration
@@ -339,10 +206,10 @@ DSP48E1 #(
   .USE_MULT("MULTIPLY"),            // Select multiplier usage ("MULTIPLY", "DYNAMIC", or "NONE")
   .USE_SIMD("ONE48"),               // SIMD selection ("ONE48", "TWO24", "FOUR12")
   // Pattern Detector Attributes: Pattern Detection Configuration
-  .AUTORESET_PATDET("NO_RESET"),    // "NO_RESET", "RESET_MATCH", "RESET_NOT_MATCH" 
+  .AUTORESET_PATDET("NO_RESET"),    // "NO_RESET", "RESET_MATCH", "RESET_NOT_MATCH"
   .MASK(48'h3fffffffffff),          // 48-bit mask value for pattern detect (1=ignore)
   .PATTERN(48'h000000000000),       // 48-bit pattern match for pattern detect
-  .SEL_MASK("MASK"),                // "C", "MASK", "ROUNDING_MODE1", "ROUNDING_MODE2" 
+  .SEL_MASK("MASK"),                // "C", "MASK", "ROUNDING_MODE1", "ROUNDING_MODE2"
   .SEL_PATTERN("PATTERN"),          // Select pattern value ("PATTERN" or "C")
   .USE_PATTERN_DETECT("NO_PATDET"), // Enable pattern detect ("PATDET" or "NO_PATDET")
   // Register Control Attributes: Pipeline Register Configuration
@@ -419,7 +286,7 @@ DSP48E1_inst (
   .RSTM(rst),                     // 1-bit input: Reset input for MREG
   .RSTP(rst)                      // 1-bit input: Reset input for PREG
 );
-// End of DSP48E1_inst instantiation		
+// End of DSP48E1_inst instantiation
     end
 endgenerate
 
@@ -433,10 +300,10 @@ DSP48E1 #(
   .USE_MULT("MULTIPLY"),            // Select multiplier usage ("MULTIPLY", "DYNAMIC", or "NONE")
   .USE_SIMD("ONE48"),               // SIMD selection ("ONE48", "TWO24", "FOUR12")
   // Pattern Detector Attributes: Pattern Detection Configuration
-  .AUTORESET_PATDET("NO_RESET"),    // "NO_RESET", "RESET_MATCH", "RESET_NOT_MATCH" 
+  .AUTORESET_PATDET("NO_RESET"),    // "NO_RESET", "RESET_MATCH", "RESET_NOT_MATCH"
   .MASK(48'h3fffffffffff),          // 48-bit mask value for pattern detect (1=ignore)
   .PATTERN(48'h000000000000),       // 48-bit pattern match for pattern detect
-  .SEL_MASK("MASK"),                // "C", "MASK", "ROUNDING_MODE1", "ROUNDING_MODE2" 
+  .SEL_MASK("MASK"),                // "C", "MASK", "ROUNDING_MODE1", "ROUNDING_MODE2"
   .SEL_PATTERN("PATTERN"),          // Select pattern value ("PATTERN" or "C")
   .USE_PATTERN_DETECT("NO_PATDET"), // Enable pattern detect ("PATDET" or "NO_PATDET")
   // Register Control Attributes: Pipeline Register Configuration

@@ -3,8 +3,7 @@
 module conv_filt (
    input       clk,
    input       rst,
-   input       sw_0,
-   input       sw_1,
+   input [7:0] sw,
 
 
    input [7:0] rx_red,
@@ -91,8 +90,7 @@ bram_delay bram_delay_0(
 dsp_cascade dsp0(
    .clk(clk),
    .rst(rst),
-   .sw_0(sw_0),
-   .sw_1(sw_1),
+   .sw(sw),
 
    .pa(bram_pa_red),
    .pb(bram_pb_red),
@@ -127,8 +125,8 @@ bram_delay bram_delay_1(
 dsp_cascade dsp1(
    .clk(clk),
    .rst(rst),
-   .sw_0(sw_0),
-   .sw_1(sw_1),
+   .sw(sw),
+
    .pa(bram_pa_green),
    .pb(bram_pb_green),
    .pc(bram_pc_green),
@@ -162,8 +160,8 @@ bram_delay bram_delay_2(
 dsp_cascade dsp2(
    .clk(clk),
    .rst(rst),
-   .sw_0(sw_0),
-   .sw_1(sw_1),
+   .sw(sw),
+
    .pa(bram_pa_blue),
    .pb(bram_pb_blue),
    .pc(bram_pc_blue),

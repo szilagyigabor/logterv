@@ -16,6 +16,7 @@ module dsp_cascade_tb ();
   dsp_cascade dsp(
      .clk(clk),
      .rst(rst),
+     .sw(8'b10000000),
      .pa(in0),
      .pb(in1),
      .pc(in2),
@@ -58,7 +59,7 @@ module dsp_cascade_tb ();
 
   initial begin
     in4={3'b000,5'b10000};;
-    //forever #2 in4[4:0]=in4[4:0]+1;
+    forever #2 in4[4:0]=in4[4:0]+1;
   end
 
 
