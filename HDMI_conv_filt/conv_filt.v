@@ -40,29 +40,27 @@ assign blue_v  = (rx_blue  & {8{rx_dv}});
 // current line is delayed according to
 // the length of the previous line
 reg rx_hs_prev;
-//reg rx_hs_posedge;
-//always @(posedge clk) begin
-//   rx_hs_prev <= rx_hs;
-//   if (rx_hs_prev == 0 && rx_hs == 1) begin
-//      rx_hs_posedge <= 1;
-//   end else begin
-//      rx_hs_posedge <= 0;
-//   end
-//end
+reg rx_hs_posedge;
+always @(posedge clk) begin
+   rx_hs_prev <= rx_hs;
+   if (rx_hs_prev == 0 && rx_hs == 1) begin
+      rx_hs_posedge <= 1;
+   end else begin
+      rx_hs_posedge <= 0;
+   end
+end
 
 reg [11:0] pic_width;
 reg [11:0] width_cntr;
 always @(posedge clk) begin
-   if (rst) begin
+   if (rst || rx_hs_posedge) begin
      width_cntr <= 0;
-  end else if (rx_hs) begin
-      width_cntr <= 0;
    end else begin
       width_cntr <= width_cntr + 1;
    end
 end
 always @(posedge clk) begin
-   if (rx_hs_prev == 0 && rx_hs == 1) begin
+   if (rx_hs_posedge) begin
       pic_width <= width_cntr;
    end
 end

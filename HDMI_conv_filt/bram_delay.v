@@ -82,5 +82,5 @@ assign pb = pbshr[3*9-2:2*9];
 assign pc = pcshr[2*9-2:1*9];
 assign pd = pdshr[7:0];
 assign pe = del3_out[7:0];
-assign stat_o = del3_out[8];
+assign stat_o = del1_out[8];
 endmodule

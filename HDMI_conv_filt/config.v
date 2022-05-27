@@ -1,2 +1,2 @@
 //comment out for HDMI loopback
-`define FILTER
+`define FILTER 1

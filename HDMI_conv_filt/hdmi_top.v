@@ -19,7 +19,11 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 
-`include "config.v"
+//`include "config.v"
+
+//comment out for HDMI loopback
+`define FILTER 1
+
 
 module hdmi_top(
    input  wire       clk100M,
