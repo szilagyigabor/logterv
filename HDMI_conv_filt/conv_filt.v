@@ -40,17 +40,8 @@ assign blue_v  = (rx_blue  & {8{rx_dv}});
 // current line is delayed according to
 // the length of the previous line
 reg [11:0] pic_width;
-reg [11:0] pic_w_cntr;
-reg [11:0] pic_w_cntr_prev;
 always @(posedge clk) begin
-  if (rst) begin
-    pic_w_cntr <= 0;
-    pic_w_cntr_prev <= 0;
-  end else if (rx_hs) begin
-    pic_width <= pic_w_cntr_prev;
-    pic_w_cntr <= 0;
-  end
-  pic_w_cntr_prev <= pic_w_cntr;
+   pic_width <= 1599;
 end
 
 // calculate address for single port blockrams
@@ -172,6 +163,7 @@ dsp_cascade dsp2(
 );
 
 // TODO: exact length to be determined
+// eggyel jobbra kéne csússzon a kép
 reg [25:0] dv_shr;
 reg [25:0] hs_shr;
 reg [25:0] vs_shr;

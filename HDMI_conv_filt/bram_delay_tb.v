@@ -21,7 +21,7 @@ module bram_delay_tb ();
 always @(posedge clk) begin
   if (rst) begin
     addr_reg <= 0;
-  end else if ( addr_reg == 19 ) begin
+  end else if ( addr_reg == 1023 ) begin
     addr_reg <= 0;
   end else begin
     addr_reg <= addr_reg + 1;
