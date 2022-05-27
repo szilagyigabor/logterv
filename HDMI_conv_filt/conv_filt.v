@@ -39,9 +39,32 @@ assign blue_v  = (rx_blue  & {8{rx_dv}});
 // counter to set picture line length
 // current line is delayed according to
 // the length of the previous line
+reg rx_hs_prev;
+//reg rx_hs_posedge;
+//always @(posedge clk) begin
+//   rx_hs_prev <= rx_hs;
+//   if (rx_hs_prev == 0 && rx_hs == 1) begin
+//      rx_hs_posedge <= 1;
+//   end else begin
+//      rx_hs_posedge <= 0;
+//   end
+//end
+
 reg [11:0] pic_width;
+reg [11:0] width_cntr;
 always @(posedge clk) begin
-   pic_width <= 1599;
+   if (rst) begin
+     width_cntr <= 0;
+  end else if (rx_hs) begin
+      width_cntr <= 0;
+   end else begin
+      width_cntr <= width_cntr + 1;
+   end
+end
+always @(posedge clk) begin
+   if (rx_hs_prev == 0 && rx_hs == 1) begin
+      pic_width <= width_cntr;
+   end
 end
 
 // calculate address for single port blockrams
@@ -50,7 +73,7 @@ reg [11:0] addr_reg;
 always @(posedge clk) begin
   if (rst) begin
     addr_reg <= 0;
-  end else if ( addr_reg == pic_width ) begin
+  end else if ( addr_reg == pic_width - 1 ) begin
     addr_reg <= 0;
   end else begin
     addr_reg <= addr_reg + 1;
@@ -162,23 +185,21 @@ dsp_cascade dsp2(
    .p_out(tx_blue)
 );
 
-// TODO: exact length to be determined
-// eggyel jobbra kéne csússzon a kép
-reg [25:0] dv_shr;
-reg [25:0] hs_shr;
-reg [25:0] vs_shr;
+reg [26:0] dv_shr;
+reg [26:0] hs_shr;
+reg [26:0] vs_shr;
 always @(posedge clk) begin
    if (rst) begin
       dv_shr <= 0;
       hs_shr <= 0;
       vs_shr <= 0;
    end else begin
-      dv_shr <= {dv_shr[24:0],dv};
-      hs_shr <= {hs_shr[24:0],hs};
-      vs_shr <= {vs_shr[24:0],vs};
+      dv_shr <= {dv_shr[25:0],dv};
+      hs_shr <= {hs_shr[25:0],hs};
+      vs_shr <= {vs_shr[25:0],vs};
    end
 end
-assign tx_dv = dv_shr[25];
-assign tx_hs = hs_shr[25];
-assign tx_vs = vs_shr[25];
+assign tx_dv = dv_shr[26];
+assign tx_hs = hs_shr[26];
+assign tx_vs = vs_shr[26];
 endmodule
