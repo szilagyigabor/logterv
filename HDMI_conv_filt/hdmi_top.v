@@ -19,11 +19,6 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 
-//`include "config.v"
-
-//comment out for HDMI loopback
-`define FILTER 1
-
 
 module hdmi_top(
    input  wire       clk100M,
@@ -149,40 +144,33 @@ hdmi_rx hdmi_rx_0(
 );
 
 
-// Loopback
-// Replace with image processing block
 wire [7:0] tx_red, tx_green, tx_blue;
 wire tx_dv, tx_hs, tx_vs;
+//conv_filt conv_filt_0(
+//   .clk(rx_clk),
+//   .rst(rst),
 
-// see config.v
-`ifdef FILTER
-conv_filt conv_filt_0(
-   .clk(rx_clk),
-   .rst(rst),
-   .sw(sw),
+//   .rx_red(rx_red),
+//   .rx_green(rx_green),
+//   .rx_blue(rx_blue),
+//   .rx_dv(rx_dv),
+//   .rx_hs(rx_hs),
+//   .rx_vs(rx_vs),
 
-   .rx_red(rx_red),
-   .rx_green(rx_green),
-   .rx_blue(rx_blue),
-   .rx_dv(rx_dv),
-   .rx_hs(rx_hs),
-   .rx_vs(rx_vs),
+//   .tx_red(tx_red),
+//   .tx_green(tx_green),
+//   .tx_blue(tx_blue),
+//   .tx_dv(tx_dv),
+//   .tx_hs(tx_hs),
+//   .tx_vs(tx_vs)
+//);
 
-   .tx_red(tx_red),
-   .tx_green(tx_green),
-   .tx_blue(tx_blue),
-   .tx_dv(tx_dv),
-   .tx_hs(tx_hs),
-   .tx_vs(tx_vs)
-);
-`else
-   assign tx_dv = rx_dv;
-   assign tx_hs = rx_hs;
-   assign tx_vs = rx_vs;
-   assign tx_red = rx_red;
-   assign tx_green = rx_green;
-   assign tx_blue = rx_blue;
-`endif //FILTER
+assign tx_dv = rx_dv;
+assign tx_hs = rx_hs;
+assign tx_vs = rx_vs;
+assign tx_red = rx_red;
+assign tx_green = rx_green;
+assign tx_blue = rx_blue;
 
 hdmi_tx hdmi_tx_0(
    .tx_clk(rx_clk),

@@ -50,7 +50,7 @@ case (sw)
       `include "coeffs/dsp_coeff_topbot.v"
     end
     8'b10000000 : begin
-      `include "coeffs/dsp_coeff_pos22.v"
+      `include "coeffs/dsp_coeff_homogen.v"
     end
 endcase
 end

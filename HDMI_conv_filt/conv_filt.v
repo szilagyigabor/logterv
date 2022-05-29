@@ -71,7 +71,7 @@ reg [11:0] addr_reg;
 always @(posedge clk) begin
   if (rst) begin
     addr_reg <= 0;
-  end else if ( addr_reg == pic_width - 1 ) begin
+  end else if ( addr_reg == pic_width ) begin
     addr_reg <= 0;
   end else begin
     addr_reg <= addr_reg + 1;
